@@ -9710,7 +9710,7 @@
           <path d="M5.5 4.5 H13.5 M5.5 8 H13.5 M5.5 11.5 H13.5 M2.5 4.5 H3 M2.5 8 H3 M2.5 11.5 H3"
             stroke-linecap="round" />
         </svg><span class="rail-label">Submissions tracker</span></div>
-      <div id="wsSel" class="rail-sel" style="display:none">
+      <div id="wsSel" class="rail-sel">
         <div class="rail-sep"></div>
         <div class="rail-btn" title="Contract check" onclick="openContract()"><svg viewBox="0 0 16 16" fill="none"
             stroke="currentColor" stroke-width="1.6">
@@ -12586,7 +12586,7 @@ Search the web for current details. Keep it tight. Do NOT output any FESTIVAL_DA
     }
 
     /* show "When selected" sidebar group once a festival is accepted */
-    function refreshSelNav() { const el = document.getElementById('wsSel'); if (el) el.style.display = acceptedFest() && (trackerPlan() || {}).tiers && (trackerPlan().tiers || []).flatMap(t => t.festivals || []).some(f => getStatus(statusKey(f.name)) === 'Accepted') ? '' : 'none' }
+    function refreshSelNav() { const el = document.getElementById('wsSel'); if (el) el.style.display = '' }
 
     /* ── Contract AI checker ── */
     /* shared streaming helper */
