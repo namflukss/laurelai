@@ -2,7 +2,7 @@
 
 The single source of truth for Laurel's UI. Everything lives in **`static/index.html`** (vanilla HTML/CSS/JS, one global `<style>`, CSS custom properties). No framework, no build step, no component files. This document describes the tokens, type, and component patterns that are actually in the code today.
 
-> ⚠️ **Naming gotcha:** the accent token is called `--orange` for legacy reasons but its value is **blue `#3D6BFF`**. Always reference `var(--orange)` / `var(--accent-*)` — never hardcode a hex, and never assume "orange" means orange. Old hardcoded `rgba(244,83,14,…)` literals are off-system; the accent is `rgba(61,107,255,…)`.
+> The accent is **blue**. The token is `--accent` (`#3D6BFF`). Always reference `var(--accent)` / `var(--accent-*)` — never hardcode a hex. (Historic note: an earlier build named this token `--orange`; it has been fully renamed to `--accent` and there are **no orange values left in the codebase**.)
 
 ---
 
@@ -45,13 +45,13 @@ Defined in the single `:root` block at the top of the `<style>`. **Never hardcod
 ### Accent (blue) — same in both themes
 | Token | Value | Use |
 |---|---|---|
-| `--orange` *(accent)* | `#3D6BFF` | The one accent — CTAs, active states, indices, fit |
-| `--orange-dk` / `--accent-deep` | `#2547C9` | Deep accent ("best"/strong) |
+| `--accent` | `#3D6BFF` | The one accent — CTAs, active states, indices, fit |
+| `--accent-deep` | `#2547C9` | Deep accent ("best"/strong fit, pressed) |
 | `--accent-hi` | `#7FA6FF` | Light accent (gradient top, crest letters) |
 | `--accent-tint` | `#E8EEFF` | Accent wash (badges, pills, icon wells) |
 | `--indigo` | `#5E8AFF` | Cool secondary |
 | `--ring` | `#3D6BFF` | = accent |
-| `--grad` | `linear-gradient(180deg, var(--accent-hi), var(--orange))` | Primary buttons, accents |
+| `--grad` | `linear-gradient(180deg, var(--accent-hi), var(--accent))` | Primary buttons, accents |
 
 ### Semantic (status only — not decoration)
 | Meaning | Color |
@@ -101,7 +101,7 @@ Fit scores are visualized on **one blue ramp** (never green/red), so strong→we
 | Strength | Threshold | Ring/arc color |
 |---|---|---|
 | Strong | `≥ 80` | `var(--accent-deep)` `#2547C9` |
-| Moderate | `30–79` | `var(--orange)` `#3D6BFF` |
+| Moderate | `30–79` | `var(--accent)` `#3D6BFF` |
 | Long shot | `< 30` | `var(--ink40)` (grey) |
 
 By-fit gauges use matching gradients: `fitStrong #2547C9→#5B86FF`, `fitMod #3D6BFF→#88AAFF`, `fitWeak grey`. Mini-rings (`miniRing`) use the solid colors above.
@@ -116,19 +116,19 @@ All "components" are CSS classes + plain builder functions that return/append DO
 The signature device that threads every view (List tiers, By-fit, Timeline, Explorer, Contract). A numbered/marked editorial overline:
 ```
 [mono index 01 / glyph]  ·  [display label]  ·  ───hairline rule───  ·  [mono meta]
-   var(--orange)             var(--ink)          var(--bdr)              var(--ink40)
+   var(--accent)             var(--ink)          var(--bdr)              var(--ink40)
 ```
-Classes: `.sec-head`, `.sec-idx` (orange mono index), `.sec-mark` (orange glyph), `.sec-label` (display 14/700), `.sec-rule` (flex:1 hairline), `.sec-meta` (mono uppercase, `b` = bold ink).
+Classes: `.sec-head`, `.sec-idx` (accent mono index), `.sec-mark` (accent glyph), `.sec-label` (display 14/700), `.sec-rule` (flex:1 hairline), `.sec-meta` (mono uppercase, `b` = bold ink).
 
-### Festival card — `.fcard` (the rich strategy card)
+### Festival card — `.fcard` (the rich strategy card; what the List tab renders)
 Layout: **crest poster · content · fit ring**, then **stat ledger** → **stepper** → **footer**.
-- `.fc-poster` — dark gradient tile, `.fc-poster-mono` monogram (accent-blue, from `tkTag(name)`), `.fc-poster-meta` micro-label. No duplicated name/location.
+- `.fc-poster` — dark gradient tile, `.fc-poster-mono` monogram (accent letters, from `tkTag(name)`), `.fc-poster-meta` micro-label. No duplicated name/location.
 - `.fc-gauge` / `.fc-ring` — the fit ring (see §5), big number + small `%`, `.fc-gauge-cap` strength label below.
 - `.fc-stats` — **hairline ledger**: 3 columns split by `.fc-stat + .fc-stat { border-left }`, lighter inline icons (no filled boxes).
 - `.fc-foot` — `[status pill] ··· [View details][Submit]`. Primary button = `var(--grad)`.
 
 ### Monograms & tiles
-`tkTag(name)` → up to 4 uppercase letters from the first word. Rendered on a dark gradient (`#1B2433→#0B1220`) with accent-blue letters. Used in cards, the timeline, the explorer, and the calendar — one crest language everywhere.
+`tkTag(name)` → up to 4 uppercase letters from the first word. Rendered on a dark gradient (`#1B2433→#0B1220`) with accent letters. Used in cards, the timeline, the explorer, and the calendar — one crest language everywhere.
 
 ### Rings & gauges
 - `miniRing(pct)` — 46px, solid ramp color, number + tiny `%`.
@@ -150,13 +150,18 @@ Layout: **crest poster · content · fit ring**, then **stat ledger** → **step
 - **Filter pill** `.fb-pill` — hairline, active = accent border + tint.
 - **Primary button** — `background: var(--grad); color:#fff`. **Ghost** — transparent + hairline, accent border on hover. All buttons `:active { transform: scale(.97) }`.
 
-### Navigation
-- `.rail` — left icon rail; `toggleRail()` adds `.expanded` to reveal `.rail-label`s. Holds Chat · Strategy plan · Explore · Deadlines · Tracker · **Contract · Press kit · Social · Announce** (`#wsSel`).
-- `.side2` — conversation list panel.
+---
+
+## 7. Navigation
+
+Two-part left nav (current layout):
+
+- **`.rail`** — the slim icon rail. `toggleRail()` adds `.expanded` to reveal `.rail-label`s. Holds, top→bottom: **Chat · Strategy plan · Explore festivals · Deadlines · Submissions tracker**, then a separator and the always-visible toolkit **Contract check · Press kit · Social posts · Announce crew** (`#wsSel`), then Toggle theme + the filmmaker avatar.
+- **`.side2`** — the wide conversation panel: brand, **New Chat**, the **SAVED** list (fills from `localStorage` as plans/chats are created), and the account footer.
 
 ---
 
-## 7. Conventions (do / don't)
+## 8. Conventions (do / don't)
 
 **Do:** edit `static/index.html`; use `var(--token)`; reuse existing classes; build UI with builder functions + `esc()`; inline SVG with `currentColor` (`viewBox 0 0 20 20`, `stroke-width 1.5`, `stroke-linecap round`); guard `gsap`/`marked`; keep one accent; use hairline ledgers over boxes; `node --check` the inline script after JS edits:
 ```bash
@@ -164,13 +169,13 @@ python3 -c "import re;h=open('static/index.html').read();b=re.findall(r'<script>
 node --check /tmp/l.js
 ```
 
-**Don't:** add React/Tailwind/a bundler/npm UI deps; hardcode hex/rgba a token covers (esp. the legacy `rgba(244,83,14,…)` orange — it's wrong now); use `--ink20` for readable text; add a second accent; add gradient text, grain, glows, or glassmorphism; duplicate data within a component (e.g. name in both poster and title).
+**Don't:** add React/Tailwind/a bundler/npm UI deps; hardcode hex/rgba a token covers; use `--ink20` for readable text; add a second accent; add gradient text, grain, glows, or glassmorphism; duplicate data within a component (e.g. name in both poster and title).
 
 ---
 
-## 8. Architecture pointers
+## 9. Architecture pointers
 
-- **Frontend:** one document, three+ stacked full-height "pages" toggled by class + GSAP slides (Chat → Plan → Festival; plus feat-pages: Explore, Tracker, Press kit, Social, Announce, Contract). State in module-scoped vars; persisted via `localStorage` (`laurel_convs`, `laurel_st::*`, `laurel_theme`, `laurel_pk`, …).
+- **Frontend:** one document, stacked full-height "pages" toggled by class + GSAP slides (Chat → Plan → Festival; plus feat-pages: Explore, Tracker, Press kit, Social, Announce, Contract). State in module-scoped vars; persisted via `localStorage` (`laurel_convs`, `laurel_st::*`, `laurel_theme`, `laurel_pk`, …).
 - **Backend:** `app.py` (FastAPI), Claude Opus 4.8, SSE streaming at `POST /api/chat`. The system prompt is **not** a string in `app.py` — it's the Markdown under `.claude/skills/festival-strategist/`, concatenated per request.
 - **Data contract:** assistant responses may append `<FESTIVAL_DATA>{…}</FESTIVAL_DATA>`, parsed client-side and stripped from visible text. Keep `parseData()` in sync with `04-festival-evaluation.md`.
 
