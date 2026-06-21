@@ -1,0 +1,7 @@
+anthropic
+fastapi
+uvicorn[standard]
+python-multipart
+# Web search: production uses the official Brave Search API (set BRAVE_API_KEY; no package needed).
+# duckduckgo-search is an optional, zero-config local fallback only.
+duckduckgo-search

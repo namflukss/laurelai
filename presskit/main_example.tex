@@ -1,0 +1,78 @@
+% main_example.tex — Laurel electronic press kit (EPK) / one-sheet
+% Compile:  pdflatex main_example.tex
+% Targets pdflatex (standard TeX Live). Lato is used if installed, else the default face.
+% /submit fills the placeholders from materials/PROFILE.md and saves a tailored copy to
+% submissions/<festival-slug>/press-kit.tex
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=0.9in]{geometry}
+\usepackage{parskip}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+\IfFileExists{lato.sty}{\usepackage[default]{lato}}{}
+
+\definecolor{accent}{HTML}{F4530E}
+\definecolor{ink}{HTML}{1C2029}
+\definecolor{dim}{HTML}{5C616B}
+\color{ink}
+\pagestyle{empty}
+
+% Section headings: small, tracked, accent rule
+\titleformat{\section}{\bfseries\large\color{ink}}{}{0em}{}[{\color{accent}\titlerule[1.5pt]}]
+\titlespacing*{\section}{0pt}{1.2em}{0.5em}
+
+% ── Film facts (edit these) ─────────────────────────────────────────
+\newcommand{\filmtitle}{THE SALT ROAD}
+\newcommand{\filmlogline}{A teenage smuggler inherits her estranged father's debt --- and the
+desert route that comes with it.}
+
+\begin{document}
+
+% ── Title block ──
+{\fontsize{30}{32}\selectfont\bfseries \filmtitle}\par
+\vspace{0.2em}{\color{accent}\rule{4cm}{2.5pt}}\par
+\vspace{0.6em}{\large\itshape \filmlogline}\par
+\vspace{0.4em}{\color{dim}\small Feature \textbar\ 94 min \textbar\ Drama \textbar\ 2026 \textbar\ Mexico/USA \textbar\ Spanish, English}\par
+
+\section*{}
+\section{Synopsis}
+\textbf{Short.} Replace with an 80--120 word synopsis: the world, the protagonist, the central
+tension. Do not spoil the third act.
+
+\medskip
+\textbf{Long.} Replace with a 200--300 word synopsis covering the fuller arc, still avoiding the
+ending unless the festival explicitly asks for it.
+
+\section{Director's statement}
+First person, ~150--250 words: why this film, the central creative choice, and what you want it to
+do for an audience. Honest and personal --- not a sales pitch.
+
+\section{Director}
+\textbf{Name.} 60--100 word bio: prior work and where it played, training, and the throughline of
+your work. Only real credits.
+
+\section{Key cast \& crew}
+\begin{itemize}[leftmargin=1.2em,nosep]
+  \item \textbf{Written \& directed by} ---
+  \item \textbf{Produced by} ---
+  \item \textbf{Cinematography} ---
+  \item \textbf{Editing} ---
+  \item \textbf{Lead cast} ---
+\end{itemize}
+
+\section{Technical specifications}
+\begin{itemize}[leftmargin=1.2em,nosep]
+  \item \textbf{Runtime:} 94 min \quad \textbf{Format:} DCP / ProRes \quad \textbf{Aspect:} 2.39:1
+  \item \textbf{Sound:} 5.1 \quad \textbf{Language:} Spanish, English (English subtitles)
+  \item \textbf{Shooting format:} \quad \textbf{Country:} \quad \textbf{Year:} 2026
+  \item \textbf{Premiere status:} World premiere available
+\end{itemize}
+
+\section{Contact}
+Name --- email --- phone --- website. (Sales/festival contact if different.)
+
+\end{document}

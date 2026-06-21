@@ -1,0 +1,496 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Laurel® — You made the film. Laurel finds where it belongs.</title>
+<meta name="description" content="An AI curator for independent filmmakers. Laurel reads your film, matches it to the festivals most likely to program it, and manages every submission, fee and deadline." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<style>
+:root{
+  --bg:#050505; --bg2:#0E0F13; --panel:rgba(255,255,255,.04); --panel2:rgba(255,255,255,.06);
+  --line:rgba(255,255,255,.10); --line2:rgba(255,255,255,.06);
+  --cream:#F5F6F7; --muted:#9BA1A5; --faint:#565B60;
+  --orange:#FF6B3D; --ember:#FF8559; --deep:#D2542E; --tint:rgba(255,107,61,.10);
+  --grotesk:'Plus Jakarta Sans',system-ui,sans-serif; --serif:'Instrument Serif',Georgia,serif; --mono:'Space Mono',monospace;
+  --e1:cubic-bezier(.16,1,.3,1); --e2:cubic-bezier(.32,.72,0,1); --pill:999px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--grotesk);background:var(--bg);color:var(--cream);overflow-x:hidden;-webkit-font-smoothing:antialiased;line-height:1.5}
+a{color:inherit;text-decoration:none}
+img{display:block;max-width:100%}
+.wrap{max-width:1200px;margin:0 auto;padding:0 32px;width:100%}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--ember);display:inline-flex;align-items:center;gap:10px}
+.eyebrow::before{content:"";width:20px;height:1px;background:var(--ember)}
+.serif{font-family:var(--serif);font-style:italic;font-weight:400}
+.glass{background:var(--panel);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--line);box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
+.grain{position:fixed;inset:0;z-index:90;pointer-events:none;opacity:.05;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+
+/* Preloader */
+#pre{position:fixed;inset:0;z-index:200;background:var(--bg);display:flex;align-items:center;justify-content:center;overflow:hidden}
+#pre .pl{font-family:var(--serif);font-style:italic;font-size:clamp(46px,9vw,108px);letter-spacing:-.02em;overflow:hidden}
+#pre .pl span{display:inline-block;transform:translateY(110%)}
+#pre .bar{position:absolute;left:0;bottom:0;height:2px;background:var(--orange);width:0}
+
+/* Nav */
+.nav{position:fixed;top:0;left:0;right:0;z-index:80;display:flex;align-items:center;justify-content:space-between;
+  padding:20px clamp(20px,4vw,44px);transition:background .4s var(--e1),backdrop-filter .4s,border-color .4s;border-bottom:1px solid transparent}
+.nav.scrolled{background:rgba(10,11,15,.75);backdrop-filter:blur(18px);border-color:var(--line2)}
+.logo{font-family:var(--serif);font-style:italic;font-size:26px;letter-spacing:-.01em}
+.logo sup{font-size:11px;font-style:normal;color:var(--ember)}
+.nav-links{display:flex;gap:30px}
+.nav-link{background:none;border:none;cursor:pointer;font-family:var(--grotesk);font-size:14px;color:var(--muted);transition:color .25s var(--e1)}
+.nav-link:hover,.nav-link.active{color:var(--cream)}
+.nav-cta{display:inline-flex;align-items:center;gap:9px;padding:10px 20px;border-radius:var(--pill);cursor:pointer;font-size:14px;font-weight:600;color:var(--cream)}
+.menu-trigger{display:none;background:none;border:none;color:var(--cream);cursor:pointer}
+@media(max-width:860px){.nav-links,.nav .nav-cta{display:none}.menu-trigger{display:block}}
+
+/* Hero */
+.hero{position:relative;min-height:100dvh;display:flex;align-items:center;justify-content:center;text-align:center;overflow:hidden}
+.hero-photo{position:absolute;inset:0;background:url("/static/shots/hero.jpg") center/cover no-repeat;transform:scale(1.08);will-change:transform;filter:saturate(.5) brightness(.74) contrast(1.05)}
+.hero-veil{position:absolute;inset:0;z-index:1;background:
+  linear-gradient(180deg, rgba(5,5,5,.5) 0%, rgba(5,5,5,.3) 42%, rgba(5,5,5,.97) 100%),
+  linear-gradient(90deg, rgba(5,5,5,.45), rgba(5,5,5,.06))}
+.hero-inner{position:relative;z-index:3;max-width:1000px;padding:120px 32px 80px}
+.hero-h1{font-family:var(--grotesk);font-weight:800;font-size:clamp(40px,7.2vw,96px);line-height:1.0;letter-spacing:-.035em}
+.hero-h1 .serif{color:var(--ember)}
+.hero-h1 .ln{display:block;overflow:hidden}
+.hero-h1 .ln>span{display:inline-block;will-change:transform}
+.hero-sub{margin:28px auto 0;max-width:620px;font-size:clamp(16px,1.6vw,19px);color:rgba(245,246,247,.8);line-height:1.6}
+.hero-cta{margin-top:36px;display:inline-flex;align-items:center;gap:11px;padding:15px 14px 15px 28px;border-radius:var(--pill);
+  background:var(--orange);color:#fff;font-size:16px;font-weight:600;cursor:pointer;box-shadow:0 10px 30px -14px rgba(0,0,0,.55)}
+.hero-cta .arr{width:30px;height:30px;border-radius:50%;background:rgba(0,0,0,.22);display:flex;align-items:center;justify-content:center;transition:transform .35s var(--e1)}
+.hero-cta:hover .arr{transform:translateX(3px)}
+.hero-cue{position:absolute;bottom:26px;left:50%;transform:translateX(-50%);z-index:3;font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint);display:flex;flex-direction:column;align-items:center;gap:9px}
+.hero-cue .l{width:1px;height:38px;background:linear-gradient(var(--ember),transparent);animation:drop 1.9s var(--e1) infinite}
+@keyframes drop{0%{transform:scaleY(0);transform-origin:top}45%{transform:scaleY(1);transform-origin:top}55%{transform:scaleY(1);transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
+
+/* Section base */
+.sec{position:relative;padding:clamp(90px,12vw,160px) 0}
+.sec-h2{font-family:var(--grotesk);font-weight:800;font-size:clamp(32px,5vw,60px);line-height:1.02;letter-spacing:-.03em;margin:20px 0 0}
+.sec-h2 .serif{color:var(--ember)}
+.sec-lead{margin:22px 0 0;max-width:600px;font-size:17px;color:var(--muted);line-height:1.6}
+
+/* How it works — roadmap */
+.hiw-intro{max-width:1200px;margin:0 auto;padding:0 32px}
+.rm{position:relative;margin-top:64px}
+.rm-line{position:absolute;left:0;right:0;top:64px;height:1px;background:var(--line)}
+.rm-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;position:relative}
+.rm-col{position:relative;padding:34px 22px 26px;border-radius:18px;cursor:pointer;transition:background .5s var(--e1);min-height:230px}
+.rm-col .rm-panel{position:absolute;inset:0;border-radius:18px;opacity:0;transition:opacity .5s var(--e1);
+  background:linear-gradient(160deg, rgba(255,255,255,.06), rgba(255,255,255,.01));border:1px solid var(--line)}
+.rm-col.on .rm-panel{opacity:1}
+.rm-num{position:relative;font-family:var(--serif);font-style:italic;font-size:30px;color:var(--faint);transition:color .4s}
+.rm-col.on .rm-num{color:var(--ember)}
+.rm-t{position:relative;font-weight:700;font-size:20px;letter-spacing:-.01em;margin:14px 0 12px;line-height:1.12}
+.rm-d{position:relative;font-size:13.5px;color:var(--muted);line-height:1.6}
+.hiw-scroll{display:flex;align-items:center;gap:12px;justify-content:center;margin-top:60px;font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+.hiw-arrow{color:var(--ember);animation:bob 1.8s var(--e1) infinite}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(5px)}}
+
+/* Festival circuit row */
+.circuit{margin-top:40px;display:flex;gap:18px;overflow-x:auto;padding:14px 32px 30px;scroll-snap-type:x mandatory;scrollbar-width:none}
+.circuit::-webkit-scrollbar{display:none}
+.fest{scroll-snap-align:center;position:relative;flex:none;width:230px;height:310px;border-radius:18px;overflow:hidden;
+  background:linear-gradient(165deg,#141620,#0A0B0F);border:1px solid var(--line);box-shadow:0 30px 60px -30px rgba(0,0,0,.7);
+  display:flex;flex-direction:column;justify-content:space-between;padding:18px;cursor:pointer;transition:transform .6s var(--e1),border-color .4s}
+.fest::after{content:"";position:absolute;inset:0;background:radial-gradient(120% 70% at 30% 0%,rgba(255,255,255,.05),transparent 60%);pointer-events:none}
+.fest:hover{transform:translateY(-8px);border-color:rgba(255,107,61,.45)}
+.fest-cat{position:relative;align-self:flex-start;font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;padding:5px 10px;border-radius:var(--pill);background:rgba(0,0,0,.4);color:rgba(245,246,247,.85)}
+.fest-b{position:relative}
+.fest-fit{font-family:var(--mono);font-size:11px;color:var(--ember);letter-spacing:.04em}
+.fest-n{font-family:var(--serif);font-style:italic;font-size:28px;line-height:1.02;margin:4px 0 0}
+.fest-loc{font-size:11.5px;color:var(--muted);margin-top:5px}
+.fest-bar{height:2px;background:var(--ember);margin-top:12px;border-radius:2px;width:0;transition:width .6s var(--e1)}
+.fest:hover .fest-bar{width:100%}
+
+/* Bouncy feature cards */
+.feat-head{display:flex;flex-direction:column;gap:22px;align-items:flex-start;margin-bottom:34px}
+.bento{display:grid;grid-template-columns:repeat(12,1fr);gap:16px}
+.bcard{position:relative;border-radius:22px;padding:26px;overflow:hidden;display:flex;flex-direction:column;gap:18px;
+  background:var(--panel);border:1px solid var(--line);box-shadow:inset 0 1px 0 rgba(255,255,255,.06);
+  transition:transform .5s var(--e1),border-color .4s;--mx:50%;--my:50%}
+.bcard::before{content:"";position:absolute;inset:0;border-radius:22px;padding:1px;opacity:0;transition:opacity .35s;
+  background:radial-gradient(180px circle at var(--mx) var(--my),rgba(255,255,255,.22),transparent 60%);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude}
+.bcard:hover{transform:translateY(-4px)}
+.bcard:hover::before{opacity:1}
+.col-4{grid-column:span 4}.col-8{grid-column:span 8}
+.bcard h3{font-family:var(--serif);font-style:italic;font-size:30px;line-height:1;letter-spacing:-.01em}
+.bpanel{border-radius:14px;padding:18px;min-height:130px;display:flex;align-items:center;border:1px solid var(--line2)}
+.bcopy{font-size:14px;color:var(--muted);line-height:1.55;max-width:46ch}
+.b-row{display:flex;align-items:center;justify-content:space-between;font-size:13.5px;color:rgba(245,246,247,.88);padding:5px 0}
+.b-row b{font-family:var(--mono);color:var(--ember);font-weight:500}
+.b-chips{display:flex;gap:10px;flex-wrap:wrap}
+.b-chip{font-size:12.5px;padding:7px 13px;border-radius:var(--pill);background:rgba(255,255,255,.06);border:1px solid var(--line);white-space:nowrap}
+.b-bars{display:flex;align-items:flex-end;gap:9px;height:90px;width:100%}
+.b-bars i{flex:1;border-radius:6px;background:rgba(255,107,61,.7)}
+.b-bars i:nth-child(even){background:rgba(255,255,255,.14)}
+.b-quote{display:flex;gap:12px;align-items:flex-start}
+.b-ava{width:30px;height:30px;border-radius:50%;background:var(--orange);color:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:16px;flex:none}
+.b-quote p{font-size:13.5px;line-height:1.45;color:rgba(245,246,247,.9)}
+@media(max-width:860px){.bento{grid-template-columns:1fr}.col-4,.col-8{grid-column:span 1}}
+
+/* Plan preview */
+.plan-card{margin-top:48px;border-radius:24px;padding:clamp(22px,3vw,34px);background:var(--panel);border:1px solid var(--line);box-shadow:inset 0 1px 0 rgba(255,255,255,.06)}
+.plan-head{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;padding-bottom:22px;border-bottom:1px solid var(--line);margin-bottom:8px}
+.plan-film{font-family:var(--serif);font-style:italic;font-size:26px}
+.plan-meta{font-size:13px;color:var(--muted);margin-top:4px}
+.plan-total{text-align:right}
+.plan-total-k{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+.plan-total-v{font-family:var(--serif);font-size:34px;color:var(--ember);line-height:1}
+.plan-total-s{font-size:11.5px;color:var(--muted);margin-top:3px}
+.plan-tier{padding:18px 0;border-bottom:1px solid var(--line2)}
+.plan-tier:last-child{border-bottom:none}
+.plan-tier-label{display:flex;align-items:baseline;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+.plan-tier-name{font-weight:700;font-size:15px}
+.plan-tier-note{font-size:12.5px;color:var(--muted)}
+.plan-fest{display:grid;grid-template-columns:1.4fr 1fr .7fr 1fr;gap:12px;padding:8px 0;font-size:13.5px;align-items:center}
+.pf-n{font-weight:600}.pf-d,.pf-fee,.pf-dl{font-family:var(--mono);font-size:12px;color:var(--muted)}
+.pf-fee{color:var(--ember)}
+@media(max-width:640px){.plan-fest{grid-template-columns:1fr auto}.pf-d,.pf-dl{display:none}}
+
+/* Teaser */
+.teaser-grid{display:grid;grid-template-columns:.9fr 1.1fr;gap:56px;align-items:center}
+.sec-cta{display:inline-flex;align-items:center;gap:10px;margin-top:28px;padding:13px 24px;border-radius:var(--pill);cursor:pointer;font-size:15px;font-weight:600;color:var(--cream)}
+.teaser-chat{border-radius:22px;padding:22px;display:flex;flex-direction:column;gap:14px;background:var(--panel);border:1px solid var(--line)}
+.tc-row{display:flex;gap:10px;max-width:88%}
+.tc-row.you{align-self:flex-end;flex-direction:row-reverse}
+.tc-ava{width:28px;height:28px;border-radius:50%;background:var(--orange);color:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:15px;flex:none}
+.tc-bubble{font-size:14px;line-height:1.5;padding:12px 16px;border-radius:16px}
+.tc-row.you .tc-bubble{background:var(--orange);color:#fff;border-bottom-right-radius:5px}
+.tc-row.laurel .tc-bubble{background:rgba(255,255,255,.06);border:1px solid var(--line);border-bottom-left-radius:5px}
+.tc-input{margin-top:4px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 16px;border-radius:14px;border:1px solid var(--line);color:var(--muted);font-size:14px;cursor:text}
+.tc-send{width:30px;height:30px;border-radius:9px;background:var(--orange);color:#fff;display:flex;align-items:center;justify-content:center}
+@media(max-width:860px){.teaser-grid{grid-template-columns:1fr;gap:36px}}
+
+/* FAQ */
+.faq-grid{display:grid;grid-template-columns:.8fr 1.2fr;gap:56px;align-items:start}
+.faq-item{border-bottom:1px solid var(--line)}
+.faq-q{width:100%;display:flex;justify-content:space-between;align-items:center;gap:20px;padding:22px 0;background:none;border:none;cursor:pointer;text-align:left;color:var(--cream);font-family:var(--grotesk);font-size:17px;font-weight:600}
+.faq-x{font-family:var(--serif);font-size:24px;color:var(--ember);flex:none;transition:transform .3s var(--e1)}
+.faq-item.open .faq-x{transform:rotate(180deg)}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .45s var(--e2)}
+.faq-a p{padding:0 0 22px;font-size:14.5px;color:var(--muted);line-height:1.65;max-width:62ch}
+@media(max-width:860px){.faq-grid{grid-template-columns:1fr;gap:30px}}
+
+/* Final CTA band */
+.cta-band{position:relative;overflow:hidden;text-align:center;padding:clamp(110px,15vw,190px) 32px}
+.cta-photo{position:absolute;inset:0;background:url("/static/shots/cta.jpg") center/cover no-repeat;transform:scale(1.06);filter:saturate(.5) brightness(.66) contrast(1.04)}
+.cta-shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(5,5,5,.66),rgba(5,5,5,.9))}
+.cta-inner{position:relative;z-index:2;max-width:780px;margin:0 auto}
+.cta-h2{font-family:var(--grotesk);font-weight:800;font-size:clamp(34px,6vw,72px);line-height:1.02;letter-spacing:-.03em}
+.cta-h2 .serif{color:var(--ember)}
+.cta-sub{margin:22px auto 0;color:rgba(245,246,247,.8);font-size:17px}
+.cta-form{margin:36px auto 0;display:flex;gap:10px;max-width:480px}
+.cta-form input{flex:1;padding:15px 18px;border-radius:var(--pill);border:1px solid var(--line);background:rgba(255,255,255,.06);color:var(--cream);font-family:var(--grotesk);font-size:15px;outline:none}
+.cta-form input:focus{border-color:var(--ember)}
+.cta-form button{padding:15px 26px;border-radius:var(--pill);border:none;background:var(--orange);color:#fff;font-weight:600;font-size:15px;cursor:pointer;white-space:nowrap}
+.cta-ok{margin-top:32px;display:inline-flex;align-items:center;gap:10px;font-size:16px;color:var(--cream)}
+.cta-ok-ico{width:30px;height:30px;border-radius:50%;background:var(--orange);color:#fff;display:flex;align-items:center;justify-content:center}
+
+/* Footer */
+footer{border-top:1px solid var(--line);padding:46px 0;display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;color:var(--faint);font-size:13px}
+footer .quote{font-family:var(--serif);font-style:italic;font-size:17px;color:var(--muted)}
+
+/* Drawer */
+.drawer{position:fixed;inset:0;z-index:120;background:rgba(16,13,8,.96);backdrop-filter:blur(20px);display:flex;flex-direction:column;justify-content:space-between;padding:24px 28px 36px;transform:translateY(-100%);transition:transform .5s var(--e2)}
+.drawer.open{transform:translateY(0)}
+.drawer-top{display:flex;justify-content:space-between;align-items:center}
+.drawer-close{background:none;border:none;color:var(--cream);cursor:pointer}
+.drawer-links{display:flex;flex-direction:column;gap:4px;margin-top:40px}
+.drawer-link{background:none;border:none;text-align:left;color:var(--cream);font-family:var(--serif);font-style:italic;font-size:38px;padding:8px 0;cursor:pointer}
+.drawer-cta{padding:16px;border-radius:var(--pill);text-align:center;font-weight:600}
+
+[data-reveal]{opacity:0;transform:translateY(32px);filter:blur(6px)}
+@media(prefers-reduced-motion:reduce){[data-reveal]{opacity:1;transform:none;filter:none}}
+</style>
+</head>
+<body>
+<div class="grain"></div>
+<div id="pre"><div class="pl"><span>Laurel</span></div><div class="bar"></div></div>
+
+<!-- NAV -->
+<header class="nav" id="nav">
+  <a class="logo" href="#top">Laurel<sup>®</sup></a>
+  <nav class="nav-links">
+    <button class="nav-link active" data-nav="#top">Home</button>
+    <button class="nav-link" data-nav="#how">How it works</button>
+    <button class="nav-link" data-nav="#plan">The plan</button>
+    <button class="nav-link" data-nav="#faq">Reach us</button>
+  </nav>
+  <a class="glass nav-cta" href="/">Talk with Laurel</a>
+  <button class="menu-trigger" id="menuBtn" aria-label="Open menu"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+</header>
+
+<!-- HERO -->
+<section class="hero" id="top">
+  <div class="hero-photo" id="heroPhoto"></div>
+  <div class="hero-veil"></div>
+  <div class="hero-inner">
+    <span class="eyebrow" data-hero>AI festival curator</span>
+    <h1 class="hero-h1">
+      <span class="ln"><span data-hero>You made the <span class="serif">film.</span></span></span>
+      <span class="ln"><span data-hero>Laurel finds where <span class="serif">it belongs.</span></span></span>
+    </h1>
+    <p class="hero-sub" data-hero>An AI curator for independent filmmakers. Laurel reads your film, matches it to the festivals most likely to program it, and manages every submission, fee and deadline — so you can stop guessing the circuit.</p>
+    <a class="hero-cta" href="/" data-hero data-magnetic>Talk with Laurel<span class="arr"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+  </div>
+  <div class="hero-cue"><div class="l"></div>Scroll</div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="sec" id="how">
+  <div class="hiw-intro">
+    <div data-reveal><span class="eyebrow">How it works</span>
+      <h2 class="sec-h2">All the way to premiere, <span class="serif">in one place.</span></h2>
+      <p class="sec-lead">No more spreadsheets, missed deadlines or guessing the circuit. Four steps from your finished film to the festivals that will actually play it.</p>
+    </div>
+    <div class="rm" data-reveal>
+      <div class="rm-line"></div>
+      <div class="rm-grid" id="rmGrid"></div>
+    </div>
+    <div class="hiw-scroll" data-reveal><span>Scroll the circuit Laurel searches</span><span class="hiw-arrow">→</span></div>
+  </div>
+  <div class="circuit" id="circuit"></div>
+</section>
+
+<!-- FEATURES -->
+<section class="sec" id="features" style="padding-top:0">
+  <div class="wrap">
+    <div class="feat-head" data-reveal>
+      <h2 class="sec-h2" style="max-width:680px;margin:0">Everything your film needs to <span class="serif">find its festival.</span></h2>
+      <a class="glass nav-cta" href="/" data-magnetic>Talk with Laurel →</a>
+    </div>
+    <div class="bento">
+      <div class="bcard col-4" data-reveal data-spot>
+        <h3>Match</h3>
+        <div class="bpanel" style="background:rgba(255,255,255,.03)">
+          <div style="width:100%">
+            <div class="b-row"><span>New York Film Festival</span><b>96%</b></div>
+            <div class="b-row"><span>Rotterdam</span><b>92%</b></div>
+            <div class="b-row"><span>SXSW</span><b>88%</b></div>
+          </div>
+        </div>
+        <p class="bcopy">Laurel reads your film and ranks all 1,400 festivals by how likely each is to program it.</p>
+      </div>
+      <div class="bcard col-8" data-reveal data-spot>
+        <h3>Submit</h3>
+        <div class="bpanel" style="background:rgba(255,255,255,.03)">
+          <div class="b-chips">
+            <span class="b-chip">Submitted</span><span class="b-chip">In review</span><span class="b-chip">Deadline Sat</span><span class="b-chip">Fee waived</span><span class="b-chip">Accepted</span>
+          </div>
+        </div>
+        <p class="bcopy">One dashboard for every submission, entry fee and deadline — Laurel files them and reminds you before each cutoff.</p>
+      </div>
+      <div class="bcard col-8" data-reveal data-spot>
+        <h3>Track</h3>
+        <div class="bpanel" style="background:rgba(255,255,255,.03)">
+          <div class="b-bars"><i style="height:40%"></i><i style="height:72%"></i><i style="height:58%"></i><i style="height:88%"></i><i style="height:64%"></i><i style="height:96%"></i><i style="height:52%"></i></div>
+        </div>
+        <p class="bcopy">Know your odds before you pay. Laurel tracks acceptance patterns so you only spend fees where you have a real shot.</p>
+      </div>
+      <div class="bcard col-4" data-reveal data-spot>
+        <h3>Curate</h3>
+        <div class="bpanel" style="background:rgba(255,255,255,.03)">
+          <div class="b-quote"><span class="b-ava">L</span><p>“Lead with Telluride — I'll hold SXSW for the spring cycle.”</p></div>
+        </div>
+        <p class="bcopy">Talk to Laurel anytime for circuit strategy, premiere timing and where to go next.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PLAN PREVIEW -->
+<section class="sec" id="plan" style="background:var(--bg2)">
+  <div class="wrap">
+    <div data-reveal><span class="eyebrow">The plan</span>
+      <h2 class="sec-h2">See your roadmap <span class="serif">before you pay a fee.</span></h2>
+      <p class="sec-lead">Every plan tiers the circuit around your film — ordered, scheduled and budgeted. This is what Laurel hands you on day one.</p>
+    </div>
+    <div class="plan-card" data-reveal>
+      <div class="plan-head">
+        <div><div class="plan-film">“The Salt Harvest”</div><div class="plan-meta">Documentary · 84 min · sample plan</div></div>
+        <div class="plan-total"><div class="plan-total-k">Total fees</div><div class="plan-total-v">$385</div><div class="plan-total-s">vs. ~$900 on a blind run</div></div>
+      </div>
+      <div id="planTiers"></div>
+    </div>
+  </div>
+</section>
+
+<!-- TEASER -->
+<section class="sec" id="teaser">
+  <div class="wrap teaser-grid">
+    <div class="teaser-copy" data-reveal>
+      <span class="eyebrow">Talk with Laurel</span>
+      <h2 class="sec-h2">A strategist who has <span class="serif">read every lineup.</span></h2>
+      <p class="sec-lead">Ask anything — premiere strategy, which fee is worth it, when to wait. Laurel answers from the festival record, not from hope.</p>
+      <a class="glass sec-cta" href="/" data-magnetic>Ask about your film<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+    </div>
+    <div class="teaser-chat" data-reveal>
+      <div class="tc-row you"><div class="tc-bubble">We just locked picture on an 84-minute observational doc about salt farmers. No premieres yet. Where do we start?</div></div>
+      <div class="tc-row laurel"><span class="tc-ava">L</span><div class="tc-bubble">Strong year for it. I'd hold your world premiere for Camden or CPH:DOX — both program exactly this register. Sundance is a long shot worth one fee; skip SXSW, your pacing isn't their crowd.</div></div>
+      <div class="tc-row laurel"><span class="tc-ava">L</span><div class="tc-bubble">Draft plan: 7 festivals, $385 in fees, first deadline May 15. Want me to build the full roadmap?</div></div>
+      <a class="tc-input" href="/"><span>Tell Laurel about your film…</span><span class="tc-send"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg></span></a>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="sec" id="faq" style="background:var(--bg2)">
+  <div class="wrap faq-grid">
+    <div data-reveal><span class="eyebrow">FAQ</span><h2 class="sec-h2">Fair questions.</h2><p class="sec-lead">The festival circuit runs on fine print. Here's ours, plainly.</p></div>
+    <div class="faq-list" id="faqList" data-reveal></div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="cta-band" id="waitlist">
+  <div class="cta-photo" id="ctaPhoto"></div>
+  <div class="cta-shade"></div>
+  <div class="cta-inner" data-reveal>
+    <h2 class="cta-h2">Every film has a room <span class="serif">that's waiting for it.</span></h2>
+    <p class="cta-sub">Join the waitlist — Laurel starts matching the moment you're in.</p>
+    <form class="cta-form" id="ctaForm"><input required type="email" placeholder="you@filmmaker.com" aria-label="Email address" /><button type="submit">Join the waitlist</button></form>
+  </div>
+</section>
+
+<footer class="wrap">
+  <p>© 2026 Laurel. Every fee pointed where it counts.</p>
+  <p class="quote">Every film has a room that's waiting for it.</p>
+</footer>
+
+<!-- DRAWER -->
+<div class="drawer" id="drawer">
+  <div>
+    <div class="drawer-top"><span class="logo">Laurel<sup>®</sup></span><button class="drawer-close" id="drawerClose" aria-label="Close"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
+    <div class="drawer-links">
+      <button class="drawer-link" data-nav="#top">Home</button>
+      <button class="drawer-link" data-nav="#how">How it works</button>
+      <button class="drawer-link" data-nav="#plan">The plan</button>
+      <button class="drawer-link" data-nav="#faq">Reach us</button>
+    </div>
+  </div>
+  <a class="glass drawer-cta" href="/">Talk with Laurel</a>
+</div>
+
+<script>
+/* ---- data ---- */
+const STEPS=[
+  {n:'01',t:'Tell Laurel about your film',d:'Genre, length, themes, where it’s premiered (if anywhere), your goals, your budget. A few minutes of conversation, the way you’d brief a strategist over coffee.'},
+  {n:'02',t:'Laurel reads the circuit',d:'Laurel matches your film against thousands of festivals — weighing fit, prestige, premiere rules, deadlines and acceptance odds. The calculus of a great strategist, without the fee.'},
+  {n:'03',t:'Get your plan',d:'A tiered roadmap — dream, realistic and safety festivals — ordered and scheduled. A fee budget that spends where it counts, plus the materials to submit well.'},
+  {n:'04',t:'Submit, track, plan what’s next',d:'Stay on top of every deadline, decode rejections into your next move, and when the run is done, Laurel turns to distribution — sales agents, platforms, an audience.'},
+];
+const FESTS=[
+  {cat:'Premiere',fit:96,n:'Telluride',loc:'Colorado · Sep'},
+  {cat:'Arthouse',fit:92,n:'Rotterdam',loc:'Netherlands · Jan'},
+  {cat:'Discovery',fit:88,n:'SXSW',loc:'Austin · Mar'},
+  {cat:'Documentary',fit:84,n:'Camden Intl.',loc:'Maine · Sep'},
+  {cat:'Documentary',fit:81,n:'Sheffield',loc:'England · Jun'},
+  {cat:'Arthouse',fit:78,n:'Visions du Réel',loc:'Nyon · Apr'},
+  {cat:'Documentary',fit:75,n:'Hot Docs',loc:'Toronto · Apr'},
+  {cat:'Documentary',fit:72,n:'DOK Leipzig',loc:'Germany · Oct'},
+];
+const TIERS=[
+  {tier:'Dream',note:'Swing big — worth holding the premiere for',fests:[{n:'Sundance',d:'Jan 22',fee:'$85',dl:'Sep 20'},{n:'Telluride',d:'Aug 29',fee:'Invite',dl:'Jun 1'}]},
+  {tier:'Realistic',note:'Strong fit — where the plan does its work',fests:[{n:'Camden Intl.',d:'Sep 18',fee:'$60',dl:'May 15'},{n:'Sheffield DocFest',d:'Jun 18',fee:'$70',dl:'Feb 28'},{n:'Visions du Réel',d:'Apr 4',fee:'$45',dl:'Dec 1'}]},
+  {tier:'Safety',note:'High-probability premieres that still matter',fests:[{n:'DOK Leipzig',d:'Oct 27',fee:'$50',dl:'Jul 1'},{n:'True/False',d:'Feb 27',fee:'$75',dl:'Nov 1'}]},
+];
+const FAQS=[
+  {q:'Will submitting through Laurel hurt my premiere status?',a:'No. Laurel plans around premiere rules from the start — world, international and regional premiere requirements are part of the matching itself, so the order of your submissions protects your strongest cards.'},
+  {q:'How does the matching actually work?',a:'Laurel reads your film’s genre, runtime, form and themes, then weighs them against each festival’s programming history, acceptance patterns, premiere rules and deadlines. Every match comes with a fit score and the reasoning behind it.'},
+  {q:'Do you take any rights to my film?',a:'None. Your film stays entirely yours. Laurel is a strategist and a submissions desk — never a distributor, sales agent or rights holder.'},
+  {q:'What does it cost?',a:'You pay festival entry fees as usual — Laurel’s job is to make sure every one of those fees is pointed at a festival you can actually get into.'},
+  {q:'Which festivals does Laurel cover?',a:'Over 1,400 active festivals, from Sundance to single-screen documentary weekends, refreshed as calls open and close.'},
+];
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* roadmap */
+let rmAct=2;
+const rmGrid=document.getElementById('rmGrid');
+rmGrid.innerHTML=STEPS.map((s,i)=>`<div class="rm-col${i===rmAct?' on':''}" data-i="${i}"><div class="rm-panel"></div><div class="rm-num">${s.n}</div><h3 class="rm-t">${esc(s.t)}</h3><p class="rm-d">${esc(s.d)}</p></div>`).join('');
+rmGrid.querySelectorAll('.rm-col').forEach(c=>{
+  const act=()=>{ rmGrid.querySelectorAll('.rm-col').forEach(x=>x.classList.remove('on')); c.classList.add('on'); };
+  c.addEventListener('mouseenter',act); c.addEventListener('click',act);
+});
+
+/* circuit */
+document.getElementById('circuit').innerHTML=FESTS.map(f=>`
+  <div class="fest"><span class="fest-cat">${esc(f.cat)}</span>
+    <div class="fest-b"><div class="fest-fit">${f.fit}% fit</div><div class="fest-n">${esc(f.n)}</div><div class="fest-loc">${esc(f.loc)}</div><div class="fest-bar"></div></div>
+  </div>`).join('');
+
+/* plan tiers */
+document.getElementById('planTiers').innerHTML=TIERS.map(t=>`
+  <div class="plan-tier"><div class="plan-tier-label"><span class="plan-tier-name">${esc(t.tier)}</span><span class="plan-tier-note">${esc(t.note)}</span></div>
+  ${t.fests.map(f=>`<div class="plan-fest"><span class="pf-n">${esc(f.n)}</span><span class="pf-d">${esc(f.d)}</span><span class="pf-fee">${esc(f.fee)}</span><span class="pf-dl">due ${esc(f.dl)}</span></div>`).join('')}
+  </div>`).join('');
+
+/* faq */
+const faqList=document.getElementById('faqList');
+faqList.innerHTML=FAQS.map((f,i)=>`<div class="faq-item${i===0?' open':''}"><button class="faq-q" aria-expanded="${i===0}"><span>${esc(f.q)}</span><span class="faq-x">∨</span></button><div class="faq-a"><p>${esc(f.a)}</p></div></div>`).join('');
+faqList.querySelectorAll('.faq-item').forEach(item=>{
+  const a=item.querySelector('.faq-a'); if(item.classList.contains('open')) a.style.maxHeight=a.scrollHeight+'px';
+  item.querySelector('.faq-q').addEventListener('click',()=>{
+    const isOpen=item.classList.contains('open');
+    faqList.querySelectorAll('.faq-item').forEach(x=>{x.classList.remove('open');x.querySelector('.faq-a').style.maxHeight=null;});
+    if(!isOpen){ item.classList.add('open'); a.style.maxHeight=a.scrollHeight+'px'; }
+  });
+});
+
+/* nav scroll + smooth nav */
+const nav=document.getElementById('nav');
+addEventListener('scroll',()=>{ nav.classList.toggle('scrolled',scrollY>40); },{passive:true});
+document.querySelectorAll('[data-nav]').forEach(b=>b.addEventListener('click',()=>{
+  const el=document.querySelector(b.dataset.nav); if(el) scrollTo({top:el.getBoundingClientRect().top+scrollY-20,behavior:'smooth'});
+  document.getElementById('drawer').classList.remove('open');
+}));
+
+/* drawer */
+document.getElementById('menuBtn').onclick=()=>document.getElementById('drawer').classList.add('open');
+document.getElementById('drawerClose').onclick=()=>document.getElementById('drawer').classList.remove('open');
+
+/* cta form */
+document.getElementById('ctaForm').addEventListener('submit',e=>{
+  e.preventDefault();
+  e.target.outerHTML='<div class="cta-ok"><span class="cta-ok-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 6 9 17l-5-5"/></svg></span>You’re on the list. Watch your inbox.</div>';
+});
+
+/* GSAP */
+addEventListener('load',()=>{
+  if(typeof gsap==='undefined'){ document.getElementById('pre').style.display='none'; document.querySelectorAll('[data-reveal],[data-hero]').forEach(el=>{el.style.opacity=1;el.style.transform='none';el.style.filter='none';}); return; }
+  const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const tl=gsap.timeline();
+  tl.to('#pre .pl span',{y:'0%',duration:.9,ease:'expo.out',delay:.12})
+    .to('#pre .bar',{width:'100%',duration:.7,ease:'power2.inOut'},'-=.5')
+    .to('#pre',{yPercent:-100,duration:.8,ease:'expo.inOut'},'+=.05').set('#pre',{display:'none'});
+  tl.from('[data-hero]',{y:28,opacity:0,filter:'blur(8px)',duration:1,stagger:.09,ease:'expo.out'},'-=.45');
+
+  if(reduce||typeof ScrollTrigger==='undefined'){ gsap.set('[data-reveal]',{opacity:1,y:0,filter:'none'}); return; }
+  gsap.registerPlugin(ScrollTrigger);
+  gsap.utils.toArray('[data-reveal]').forEach(el=>gsap.to(el,{opacity:1,y:0,filter:'blur(0px)',duration:1,ease:'expo.out',scrollTrigger:{trigger:el,start:'top 86%'}}));
+  /* hero photo parallax + zoom-out */
+  gsap.to('#heroPhoto',{yPercent:16,scale:1.16,ease:'none',scrollTrigger:{trigger:'.hero',start:'top top',end:'bottom top',scrub:true}});
+  gsap.to('#ctaPhoto',{yPercent:-12,ease:'none',scrollTrigger:{trigger:'.cta-band',start:'top bottom',end:'bottom top',scrub:true}});
+});
+
+/* magnetic + spotlight (transform/opacity only) */
+if(matchMedia('(hover:hover)').matches){
+  document.querySelectorAll('[data-magnetic]').forEach(b=>{
+    b.addEventListener('pointermove',e=>{const r=b.getBoundingClientRect();b.style.transform=`translate(${(e.clientX-r.left-r.width/2)*.2}px,${(e.clientY-r.top-r.height/2)*.3}px)`;});
+    b.addEventListener('pointerleave',()=>{b.style.transition='transform .5s var(--e1)';b.style.transform='';setTimeout(()=>b.style.transition='',500);});
+  });
+  document.querySelectorAll('[data-spot]').forEach(c=>{
+    c.addEventListener('pointermove',e=>{const r=c.getBoundingClientRect();c.style.setProperty('--mx',(e.clientX-r.left)+'px');c.style.setProperty('--my',(e.clientY-r.top)+'px');});
+  });
+}
+</script>
+</body>
+</html>

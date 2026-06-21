@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# Secrets — never commit API keys
+.env
+.env.*
+*.key
+
+# Editor / OS
+.DS_Store
+.vscode/
+.idea/
+
+# Local backups & scratch
+*.bak.*
+static/*.bak.*
