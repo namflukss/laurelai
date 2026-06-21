@@ -2,7 +2,7 @@
 
 The single source of truth for Laurel's UI. Everything lives in **`static/index.html`** (vanilla HTML/CSS/JS, one global `<style>`, CSS custom properties). No framework, no build step, no component files. This document describes the tokens, type, and component patterns that are actually in the code today.
 
-> The accent is **blue**. The token is `--accent` (`#3D6BFF`). Always reference `var(--accent)` / `var(--accent-*)` — never hardcode a hex. (Historic note: an earlier build named this token `--orange`; it has been fully renamed to `--accent` and there are **no orange values left in the codebase**.)
+> The accent is **blue**. The token is `--accent` (`#3D6BFF`). Always reference `var(--accent)` / `var(--accent-*)` — never hardcode a hex.
 
 ---
 

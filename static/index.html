@@ -11184,7 +11184,7 @@
       } else { page.classList.remove('open') }
     }
     function briefingSkeleton() {
-      // Mirrors the 4-section briefing: each = orange label + 2-3 text lines
+      // Mirrors the 4-section briefing: each = accent label + 2-3 text lines
       const widths = [['w-full', 'w-92', 'w-70'], ['w-full', 'w-84'], ['w-full', 'w-92', 'w-84'], ['w-full', 'w-70']]
       return '<div class="skel">' + widths.map(lines =>
         `<div class="skel-group"><div class="skel-bar label"></div>${lines.map(w => `<div class="skel-bar ${w}"></div>`).join('')}</div>`
