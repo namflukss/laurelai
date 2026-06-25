@@ -9673,6 +9673,217 @@
     .cmp-note a {
       color: var(--ink60);
     }
+
+    /* ============================================================
+       MOBILE (<= 820px) — consolidated; placed last to win the cascade
+       ============================================================ */
+    .m-burger {
+      display: none;
+    }
+
+    #mNavBack {
+      display: none;
+    }
+
+    @media (max-width: 820px) {
+
+      html,
+      body {
+        overflow-x: hidden;
+      }
+
+      .app {
+        height: 100dvh;
+      }
+
+      .side,
+      .side2 {
+        display: none !important;
+      }
+
+      .main {
+        padding: 0;
+        height: 100dvh;
+      }
+
+      .panel {
+        border: 0;
+        border-radius: 0;
+      }
+
+      /* Hamburger in the chat header */
+      .lp-bar {
+        gap: 4px;
+      }
+
+      .m-burger {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 38px;
+        height: 38px;
+        flex: none;
+        margin-right: 2px;
+        border: none;
+        background: transparent;
+        color: var(--ink);
+        cursor: pointer;
+      }
+
+      .m-burger svg {
+        width: 22px;
+        height: 22px;
+      }
+
+      /* Rail becomes a slide-in drawer (reuses the .expanded inner layout) */
+      .rail {
+        display: flex !important;
+        position: fixed;
+        inset: 0 auto 0 0;
+        width: 272px;
+        max-width: 84vw;
+        background: var(--bg2);
+        border-right: 1px solid var(--bdr-lt);
+        transform: translateX(-103%);
+        transition: transform .3s var(--ease);
+        z-index: 1000;
+        overflow-y: auto;
+      }
+
+      .rail.expanded {
+        width: 272px;
+        max-width: 84vw;
+        padding: 18px 14px;
+      }
+
+      .rail.m-open {
+        transform: none;
+        box-shadow: 0 0 60px rgba(8, 9, 12, .35);
+      }
+
+      .rail-orb {
+        display: none;
+      }
+
+      #mNavBack {
+        display: block;
+        position: fixed;
+        inset: 0;
+        background: rgba(8, 9, 12, .42);
+        z-index: 999;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity .3s var(--ease);
+      }
+
+      #mNavBack.on {
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      /* Full-screen overlay pages */
+      .plan-page,
+      .fest-page,
+      .tracker-page,
+      .feat-page {
+        left: 0 !important;
+        padding: 0;
+      }
+
+      .plan-page .pp-panel,
+      .fest-page .pp-panel,
+      .tracker-page .pp-panel,
+      .feat-page .pp-panel {
+        border: 0;
+        border-radius: 0;
+      }
+
+      /* Headers / toolbars wrap; keep the view toggle reachable */
+      .pp-head.oh {
+        flex-wrap: wrap;
+        row-gap: 8px;
+        padding-right: 12px;
+      }
+
+      .pp-head.oh .pp-actions {
+        margin-left: auto;
+      }
+
+      .oh-toggle {
+        margin-left: 0;
+      }
+
+      .pp-inner {
+        padding: 20px 16px 48px;
+      }
+
+      .tk-head {
+        flex-wrap: wrap;
+        row-gap: 6px;
+      }
+
+      .tk-body {
+        padding: 16px;
+      }
+
+      /* Single-column safety nets */
+      .fitgrid,
+      .exp-grid,
+      .exp-cal {
+        grid-template-columns: 1fr !important;
+      }
+
+      .exp-controls {
+        padding: 12px 16px;
+      }
+
+      /* Declutter chat header — hamburger + Laurel + New Chat only */
+      .lp-bar {
+        overflow: hidden;
+      }
+
+      .lp-acts .pa-btn:nth-child(1),
+      .lp-acts .pa-btn:nth-child(2) {
+        display: none;
+      }
+
+      /* Composer fits the viewport */
+      .composer {
+        padding: 10px 14px 16px;
+      }
+
+      .composer-inner {
+        max-width: 100%;
+      }
+
+      .composer-box {
+        max-width: 100%;
+      }
+
+      /* Bottom tool row wraps instead of forcing width */
+      .composer-foot {
+        flex-wrap: wrap;
+        gap: 8px 10px;
+        padding: 9px 10px 11px;
+      }
+
+      .cmp-right {
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      /* Plan header actions: horizontal scroll instead of overflow */
+      .pp-actions {
+        max-width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      /* Festival-detail banner + stats stack */
+      .fp-banner-grid {
+        grid-template-columns: 1fr;
+      }
+    }
   </style>
 </head>
 
@@ -9681,6 +9892,7 @@
   <div class="grain"></div>
 
   <div class="app">
+    <div id="mNavBack" onclick="closeMobileNav()"></div>
 
     <!-- Sidebar -->
     <aside class="rail">
@@ -9804,6 +10016,7 @@
     <main class="main">
       <div class="panel">
         <div class="lp-bar">
+          <button class="m-burger" onclick="toggleMobileNav()" aria-label="Open menu"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 6h14M3 10h14M3 14h14" stroke-linecap="round" /></svg></button>
           <div class="lp-logo">Laurel</div>
           <div class="lp-plus">Plus</div>
           <div class="lp-acts">
@@ -12932,6 +13145,24 @@ Search the web for current details. Keep it tight. Do NOT output any FESTIVAL_DA
 
     function toggleRail() { const r = document.querySelector('.rail'); if (r) r.classList.toggle('expanded') }
     function collapseRail() { const r = document.querySelector('.rail'); if (r) r.classList.remove('expanded') }
+    /* Mobile nav drawer (rail becomes off-canvas at <=820px) */
+    function toggleMobileNav() {
+      const r = document.querySelector('.rail'); if (!r) return
+      const open = !r.classList.contains('m-open')
+      r.classList.toggle('m-open', open); r.classList.toggle('expanded', open)
+      const b = document.getElementById('mNavBack'); if (b) b.classList.toggle('on', open)
+      try { document.body.style.overflow = open ? 'hidden' : '' } catch (e) { }
+    }
+    function closeMobileNav() {
+      const r = document.querySelector('.rail'); if (r) { r.classList.remove('m-open'); r.classList.remove('expanded') }
+      const b = document.getElementById('mNavBack'); if (b) b.classList.remove('on')
+      try { document.body.style.overflow = '' } catch (e) { }
+    }
+    // tapping any nav item closes the drawer (after its own navigation runs)
+    document.addEventListener('click', function (e) {
+      const btn = e.target.closest && e.target.closest('.rail-btn')
+      if (btn && document.querySelector('.rail.m-open')) setTimeout(closeMobileNav, 80)
+    }, true)
 
     function newChat() {
       history = []
