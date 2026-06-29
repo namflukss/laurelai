@@ -5535,6 +5535,97 @@
       min-width: 0;
     }
 
+    /* Premiere impact card */
+    .fp-impact {
+      border: 1px solid rgba(61, 107, 255, .28);
+      background: var(--accent-tint);
+      border-radius: 14px;
+      padding: 16px 18px;
+      margin-bottom: 18px;
+    }
+
+    .fp-impact.warn {
+      border-color: rgba(194, 134, 12, .3);
+      background: #FFF6EC;
+    }
+
+    .fp-imp-head {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--accent-deep);
+      margin-bottom: 9px;
+    }
+
+    .fp-impact.warn .fp-imp-head {
+      color: #B5790B;
+    }
+
+    .fp-imp-head svg {
+      width: 15px;
+      height: 15px;
+    }
+
+    .fp-imp-body {
+      font-size: 13.5px;
+      line-height: 1.55;
+      color: var(--ink60);
+    }
+
+    .fp-imp-body b {
+      color: var(--ink);
+      font-weight: 700;
+    }
+
+    .fp-imp-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin-top: 11px;
+    }
+
+    .fp-imp-chip {
+      font-size: 11.5px;
+      font-weight: 600;
+      color: #C0413B;
+      background: rgba(214, 69, 63, .08);
+      border: 1px solid rgba(214, 69, 63, .22);
+      border-radius: 999px;
+      padding: 4px 11px;
+    }
+
+    .fp-imp-sub {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(61, 107, 255, .15);
+      font-size: 12.5px;
+      color: var(--ink40);
+    }
+
+    .fp-impact.warn .fp-imp-sub {
+      border-top-color: rgba(194, 134, 12, .2);
+    }
+
+    .fp-imp-sub b {
+      color: var(--ink);
+    }
+
+    .fp-imp-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #1A9E63;
+      flex: none;
+    }
+
     .fp-rail {
       width: 330px;
       flex: none;
@@ -10358,6 +10449,8 @@
                   <div class="fp-stats" id="fpStats"></div>
                 </div>
 
+                <div class="fp-impact" id="fpImpact" style="display:none"></div>
+
                 <div class="fp-track" id="fpTracker"></div>
 
                 <div class="fp-dna" id="fpDna" style="display:none"></div>
@@ -11369,6 +11462,25 @@
       if (f.risk) stats.push(`<div class="fp-stat"><div class="fp-stat-k">Main risk</div><div class="fp-stat-v">${esc(f.risk)}</div></div>`)
       document.getElementById('fpStats').innerHTML = stats.join('')
 
+      // Premiere impact — the cascade submitting here triggers across the plan
+      const imp = premiereImpact(f, data); const impEl = document.getElementById('fpImpact')
+      if (impEl) {
+        if (imp) {
+          impEl.style.display = ''
+          impEl.classList.toggle('warn', !imp.fReqWorld)
+          const n = imp.lockedOut.length
+          const chips = imp.lockedOut.map(x => `<span class="fp-imp-chip">${esc(x.name)}</span>`).join('')
+          const head = imp.fReqWorld
+            ? `<b>This festival wants your world premiere.</b> Submit here first and wait for its decision — it’s the right place to spend it.`
+            : `<b>Heads up — screening here spends your one world premiere</b>, and this festival doesn’t even require it.`
+          impEl.innerHTML = `
+        <div class="fp-imp-head"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M10 2.5l2 4.5 5 .5-3.7 3.3 1.1 4.9L10 17.3 5.6 18.7l1.1-4.9L3 10.5l5-.5z" stroke-linejoin="round" stroke-linecap="round"/></svg>Premiere impact</div>
+        <div class="fp-imp-body">${head} Once your film screens, <b>${n}</b> festival${n > 1 ? 's' : ''} in your plan that need${n > 1 ? '' : 's'} a world premiere can no longer take it:</div>
+        <div class="fp-imp-chips">${chips}</div>
+        ${imp.staysOpen.length ? `<div class="fp-imp-sub"><span class="fp-imp-dot"></span><b>${imp.staysOpen.length}</b> still reachable — they accept an international or national premiere.</div>` : ''}`
+        } else { impEl.style.display = 'none' }
+      }
+
       // Links + cover letter
       document.getElementById('fpFF').onclick = () => window.open('https://filmfreeway.com/festivals?q=' + encodeURIComponent(f.name || ''), '_blank')
       document.getElementById('fpLink').onclick = () => window.open('https://www.google.com/search?q=' + encodeURIComponent((f.name || '') + ' film festival official submission'), '_blank')
@@ -11597,6 +11709,22 @@ Search the web for current details. Keep it tight. Do NOT output any FESTIVAL_DA
         return { cls: 'conflict', label: 'Needs world premiere' }
       }
       return { cls: 'uses', label: `Wants ${req} premiere` }
+    }
+
+    /* Premiere impact — how submitting/screening at THIS festival changes the rest of the plan.
+       A film has one world premiere; once it screens publicly, every other festival that
+       requires a world premiere is locked out. Surfaces that cascade before you commit. */
+    function premiereImpact(f, data) {
+      if (!data || !filmHasWorld(data)) return null          // world premiere already placed → no new world impact
+      const all = (data.tiers || []).flatMap(t => t.festivals || [])
+      const key = x => (x.name || '').toLowerCase().trim()
+      const me = key(f)
+      const live = x => !['Accepted', 'Rejected'].includes(getStatus(statusKey(x.name)))
+      const lockedOut = all.filter(x => key(x) !== me && (x.premiere_required || '').toLowerCase() === 'world' && live(x))
+      if (!lockedOut.length) return null                     // nothing to lock out → nothing to warn about
+      const staysOpen = all.filter(x => key(x) !== me && (x.premiere_required || 'none').toLowerCase() !== 'world' && live(x))
+      const fReqWorld = (f.premiere_required || '').toLowerCase() === 'world'
+      return { fReqWorld, lockedOut, staysOpen }
     }
 
     /* Orbit detail ring — number + word label (festival hero) */
